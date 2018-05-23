@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+    <head>
+        <title>Image Search | Welcome</title>
+        <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet"/>
+        <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+        <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+        <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    </head>
+
+    <body>
+        <div class="container">
+            <div class="row">
+                <div class="col text-center">
+                    <h1>Image Search</h1>
+                </div>
+            </div>
+            <form action="/search" method="GET"> 
+                <div class="row">
+                  <div class="col">
+                    <div class="input-group">
+                      <input type="text" class="form-control" placeholder="Search" id="txtSearch" name="searchTag"/>
+                      <div class="input-group-btn">
+                        <button class="btn btn-primary" type="submit">
+                          <span class="glyphicon glyphicon-search"></span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+            </form>
+            <br><br>
+            <div id="searchResults" class="d-flex flex-row"></div>
+        </div>
+    </body>
+
+<script>
+var form = document.querySelector("form")
+// function to make AJAX call for searching images corresponding to search value entered
+form.addEventListener("submit", function(e) { 
+  e.preventDefault()
+  var x = new XMLHttpRequest()
+  x.onreadystatechange = function() {
+    if(x.readyState == 4) {
+      var urlsString = x.response
+      var display = ""
+      console.log(urlsString)
+      if(urlsString == ''){
+          display = '<p class="text-info">No images found for this tag!</p>';
+      }else{
+          var urlsArray = urlsString.split(",")
+          display += '<p class="text-success">Top '+urlsArray.length+' images found are:</p>'
+          for (let value of urlsArray) {
+            //alert(value)
+            display += '<div class="p-2 text-center" ><img src="'+value+'" class="img-thumbnail" style="width: 50%; height: 50%"></div>'
+          }
+      }
+      document.getElementById("searchResults").innerHTML = display;
+      
+    }
+  }
+  x.open("POST", "/search")
+  x.send(new FormData(form))
+})
+
+</script>
+
+<script>
+  // function to fetch values for autocomplete in search field
+  $( function() {
+    var availableTags
+    $.get( "/fetchTags", function( data ) {
+      availableTags = data.split(",")
+      $( "#txtSearch" ).autocomplete({
+        source: availableTags
+      });
+    });
+  });
+</script>
